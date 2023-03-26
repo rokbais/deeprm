@@ -1,5 +1,5 @@
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 class Dist:
 
@@ -54,7 +54,7 @@ class Dist:
         for i in range(self.num_res):
             nw_size[i] = np.random.randint(1, self.max_nw_size + 1)
     
-    return nw_len, nw_size
+        return nw_len, nw_size
 
     def bernoulli_dist(self):
         # -- job length --
@@ -100,13 +100,57 @@ class Dist:
         return nw_len, nw_size
 
 
+def sequence_statistics(seq, output_path, title):
+    f = open(output_path + title + ".txt", "w")
+    l = "======================================"
+    f.write(l + "\n")
+    print l
+    l = "Statistic on jobs: "
+    f.write(l + "\n")
+    print l
+    l = "======================================"
+    f.write(l + "\n")
+    print l
+    l = "sequence is: " + title
+    f.write(l + "\n")
+    print l
+    l = "sequence size is:  {}".format(seq.size)
+    f.write(l + "\n")
+    print l
+    l = "sequence shape is: {}".format(seq.shape)
+    f.write(l + "\n")
+    print l
+    l = "range of value is: {}".format(seq.ptp())
+    f.write(l + "\n")
+    print l
+    l = "max is:  {}".format(seq.max())
+    f.write(l + "\n")
+    print l
+    l = "min is:  {}".format(seq.min())
+    f.write(l + "\n")
+    print l
+    l = "mean is: {}".format(seq.mean())
+    f.write(l + "\n")
+    print l
+    l = "std is:  {}".format(seq.std())
+    f.write(l + "\n")
+    print l
+    l = "var is:  {}".format(seq.var())
+    f.write(l + "\n")
+    print l
+    f.close()
+    plt.hist(seq) 
+    plt.title(title + " histogram") 
+    plt.savefig(output_path + title + ".pdf")
+    print "======================================"
+
 def generate_sequence_work(pa, seed=42):
 
     np.random.seed(seed)
 
     simu_len = pa.simu_len * pa.num_ex
 
-    nw_dist = pa.dist.bi_model_dist
+    nw_dist = pa.dist.exp_dist
 
     nw_len_seq = np.zeros(simu_len, dtype=int)
     nw_size_seq = np.zeros((simu_len, pa.num_res), dtype=int)
@@ -122,4 +166,8 @@ def generate_sequence_work(pa, seed=42):
     nw_size_seq = np.reshape(nw_size_seq,
                              [pa.num_ex, pa.simu_len, pa.num_res])
 
+    sequence_statistics(nw_len_seq, "./data/", "nw_len_seq")
+    # TODO: fully understand the relationship between len and size.
+    # sequence_statistics(nw_size_seq, "./data/nw_size_seq.pdf", "nw_size_seq")
+    
     return nw_len_seq, nw_size_seq
