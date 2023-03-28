@@ -47,7 +47,8 @@ class Dist:
     
     def exp_dist(self):
         # new work duration
-        nw_len = np.random.exponential(scale=self.job_len)
+        # WARNING: temp hardcode for max job 15
+        nw_len = np.random.exponential(scale=2.5)
     
         nw_size = np.zeros(self.num_res)
     
@@ -100,7 +101,17 @@ class Dist:
         return nw_len, nw_size
 
 
-def sequence_statistics(seq, output_path, title):
+def sequence_statistics_flat(seq, output_path, title, dist_name):
+    plt.figure()
+    plt.hist(seq, bins='auto') 
+    plt.title(dist_name + " Total Jobs' Length Distribution") 
+    plt.xlabel("Job Length")
+    plt.ylabel("Count")
+    plt.savefig(output_path + title + ".pdf")
+    plt.show()
+    print "======================================"
+
+def sequence_statistics_by_example(seq, output_path, title, dist_name):
     f = open(output_path + title + ".txt", "w")
     l = "======================================"
     f.write(l + "\n")
@@ -139,9 +150,20 @@ def sequence_statistics(seq, output_path, title):
     f.write(l + "\n")
     print l
     f.close()
-    plt.hist(seq) 
-    plt.title(title + " histogram") 
+
+    ### histogram
+    num_ex, num_job_in_ex = seq.shape
+    labels = []
+    for i in range(0,num_ex):
+        labels.append("Training Set #" + str(i))
+    plt.figure()
+    plt.hist(seq, label=labels) 
+    plt.legend()
+    plt.title(dist_name + " By Training Set Job Length histogram") 
+    plt.xlabel("Job Length")
+    plt.ylabel("Count")
     plt.savefig(output_path + title + ".pdf")
+    plt.show()
     print "======================================"
 
 def generate_sequence_work(pa, seed=42):
@@ -150,7 +172,11 @@ def generate_sequence_work(pa, seed=42):
 
     simu_len = pa.simu_len * pa.num_ex
 
+    ##############
+    # distribution name
     nw_dist = pa.dist.exp_dist
+    nw_dist_name = "Exponential Distribution"
+    #############
 
     nw_len_seq = np.zeros(simu_len, dtype=int)
     nw_size_seq = np.zeros((simu_len, pa.num_res), dtype=int)
@@ -161,12 +187,14 @@ def generate_sequence_work(pa, seed=42):
 
             nw_len_seq[i], nw_size_seq[i, :] = nw_dist()
 
+    sequence_statistics_flat(nw_len_seq, "./data/", "nw_len_seq_total", nw_dist_name)
+
     nw_len_seq = np.reshape(nw_len_seq,
                             [pa.num_ex, pa.simu_len])
     nw_size_seq = np.reshape(nw_size_seq,
                              [pa.num_ex, pa.simu_len, pa.num_res])
 
-    sequence_statistics(nw_len_seq, "./data/", "nw_len_seq")
+    sequence_statistics_by_example(nw_len_seq, "./data/", "nw_len_seq_by_example", nw_dist_name)
     # TODO: fully understand the relationship between len and size.
     # sequence_statistics(nw_size_seq, "./data/nw_size_seq.pdf", "nw_size_seq")
     
