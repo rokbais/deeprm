@@ -51,7 +51,7 @@ class Env:
         self.seq_idx = 0  # index in that sequence
 
         # initialize system
-        self.choose_action = Machine(pa)
+        self.machine = Machine(pa)
         self.job_slot = JobSlot(pa)
         self.job_backlog = JobBacklog(pa)
         self.job_record = JobRecord()
