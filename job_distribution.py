@@ -228,7 +228,7 @@ def generate_sequence_work(pa, seed=42):
         if np.random.rand() < pa.new_job_rate:  # a new job comes
             nw_len_seq[i], nw_size_seq[i, :], nw_dist_seq[i] = nw_dist()
 
-            nw_len_seq[i], nw_size_seq[i, :] = nw_dist()
+            #nw_len_seq[i], nw_size_seq[i, :] = nw_dist()
 
     sequence_statistics_flat(nw_len_seq, "./data/", "nw_len_seq_total", nw_dist_name)
 
