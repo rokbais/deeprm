@@ -201,6 +201,71 @@ def sequence_statistics_by_example(seq, output_path, title, dist_name):
     plt.show()
     print "======================================"
 
+def sequence_statistics_flat(seq, output_path, title, dist_name):
+    plt.figure()
+    plt.hist(seq, bins='auto') 
+    plt.title(dist_name + " Total Jobs' Length Distribution") 
+    plt.xlabel("Job Length")
+    plt.ylabel("Count")
+    plt.savefig(output_path + title + ".pdf")
+    plt.show()
+    print "======================================"
+
+def sequence_statistics_by_example(seq, output_path, title, dist_name):
+    f = open(output_path + title + ".txt", "w")
+    l = "======================================"
+    f.write(l + "\n")
+    print l
+    l = "Statistic on jobs: "
+    f.write(l + "\n")
+    print l
+    l = "======================================"
+    f.write(l + "\n")
+    print l
+    l = "sequence is: " + title
+    f.write(l + "\n")
+    print l
+    l = "sequence size is:  {}".format(seq.size)
+    f.write(l + "\n")
+    print l
+    l = "sequence shape is: {}".format(seq.shape)
+    f.write(l + "\n")
+    print l
+    l = "range of value is: {}".format(seq.ptp())
+    f.write(l + "\n")
+    print l
+    l = "max is:  {}".format(seq.max())
+    f.write(l + "\n")
+    print l
+    l = "min is:  {}".format(seq.min())
+    f.write(l + "\n")
+    print l
+    l = "mean is: {}".format(seq.mean())
+    f.write(l + "\n")
+    print l
+    l = "std is:  {}".format(seq.std())
+    f.write(l + "\n")
+    print l
+    l = "var is:  {}".format(seq.var())
+    f.write(l + "\n")
+    print l
+    f.close()
+
+    ### histogram
+    num_ex, num_job_in_ex = seq.shape
+    labels = []
+    for i in range(0,num_ex):
+        labels.append("Training Set #" + str(i))
+    plt.figure()
+    plt.hist(seq, label=labels) 
+    plt.legend()
+    plt.title(dist_name + " By Training Set Job Length histogram") 
+    plt.xlabel("Job Length")
+    plt.ylabel("Count")
+    plt.savefig(output_path + title + ".pdf")
+    plt.show()
+    print "======================================"
+
 def generate_sequence_work(pa, seed=42):
 
     np.random.seed(seed)
@@ -209,9 +274,11 @@ def generate_sequence_work(pa, seed=42):
 
     ##############
     # distribution name
+
     nw_dist = pa.dist.merged_dist
     nw_dist_name = "Merged Distribution"
-    #############
+
+
 
     nw_len_seq = np.zeros(simu_len, dtype=int)
     nw_size_seq = np.zeros((simu_len, pa.num_res), dtype=int)
@@ -232,6 +299,8 @@ def generate_sequence_work(pa, seed=42):
 
     sequence_statistics_flat(nw_len_seq, "./data/", "nw_len_seq_total", nw_dist_name)
 
+    sequence_statistics_flat(nw_len_seq, "./data/", "nw_len_seq_total", nw_dist_name)
+
     nw_len_seq = np.reshape(nw_len_seq,
                             [pa.num_ex, pa.simu_len])
     nw_size_seq = np.reshape(nw_size_seq,
@@ -243,4 +312,6 @@ def generate_sequence_work(pa, seed=42):
     # TODO: fully understand the relationship between len and size.
     # sequence_statistics(nw_size_seq, "./data/nw_size_seq.pdf", "nw_size_seq")
     
+
     return nw_len_seq, nw_size_seq
+
