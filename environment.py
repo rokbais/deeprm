@@ -25,6 +25,7 @@ class Env:
         else:
             np.random.seed(seed)
 
+        # If the caller did not define job len and size, then we generate it here
         if nw_len_seqs is None or nw_size_seqs is None:
             # generate new work
             self.nw_len_seqs, self.nw_size_seqs = \
@@ -44,17 +45,19 @@ class Env:
         else:
             self.nw_len_seqs = nw_len_seqs
             self.nw_size_seqs = nw_size_seqs
+            self.nw_source_seqs = nw_source_seqs
 
         self.seq_no = 0  # which example sequence
         self.seq_idx = 0  # index in that sequence
 
         # initialize system
-        self.machine = Machine(pa)
+        self.choose_action = Machine(pa)
         self.job_slot = JobSlot(pa)
         self.job_backlog = JobBacklog(pa)
         self.job_record = JobRecord()
         self.extra_info = ExtraInfo(pa)
 
+    # This is the default generate_sequence_work, which does not take distributions type and source into consideration. We are fine leaving it as it is for now because we use the generation function from job_distribution.py
     def generate_sequence_work(self, simu_len):
 
         nw_len_seq = np.zeros(simu_len, dtype=int)
@@ -71,6 +74,7 @@ class Env:
     def get_new_job_from_seq(self, seq_no, seq_idx):
         new_job = Job(res_vec=self.nw_size_seqs[seq_no, seq_idx, :],
                       job_len=self.nw_len_seqs[seq_no, seq_idx],
+                      job_dist=self.nw_dist_seqs[seq_no],
                       job_id=len(self.job_record.record),
                       enter_time=self.curr_time)
         return new_job
@@ -333,13 +337,14 @@ class Env:
 
 
 class Job:
-    def __init__(self, res_vec, job_len, job_id, enter_time):
+    def __init__(self, res_vec, job_len, job_id, enter_time, job_dist="A"):
         self.id = job_id
         self.res_vec = res_vec
         self.len = job_len
         self.enter_time = enter_time
         self.start_time = -1  # not being allocated
         self.finish_time = -1
+        self.job_dist = job_dist # which distribution does the job come from?
 
 
 class JobSlot:
