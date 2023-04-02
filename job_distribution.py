@@ -199,16 +199,16 @@ def sequence_statistics_by_example(seq, output_path, outfile, dist_name, hist_ti
     print "======================================"
 
 def sequence_statistics_resource_workload(nw_len_seq, nw_size_seq, output_path, dist_name):
-    size = nw_len_sqe.size
+    size = nw_size_seq.size
     num_ex, num_job_in_ex = nw_len_seq.shape
     _, _, num_res = nw_size_seq.shape
-    workload = np.zeros(size)
+    workload = np.zeros([num_ex, num_job_in_ex])
 
-    for i in xrange(size):
-        workload[i] = np.sum(nw_len_seq[i] * nw_size_seq[i, :])
-        print("Load on # " + str(i) + " resource dimension is " + str(self.workload[i]))
-
-    workload.reshape(workload, [num_ex, num_job_in_ex])
+    for i in xrange(num_ex):
+        for j in range(num_job_in_ex):
+            for k in range(num_res):
+                workload[i][j] += nw_len_seq[i][j] * nw_size_seq[i][j][k]
+        print("Load on # " + str(i) + " resource dimension is " + str(workload[i]))
 
     # Plot the sum workload 
     sequence_statistics_by_example(workload, output_path, "workload_resource", dist_name, " By Training Set Job Resource Size Histogram", "Total Job Resource")
@@ -260,4 +260,4 @@ def generate_sequence_work(pa, seed=42):
 
 
 
-    return nw_len_seq, nw_size_seq
+    return nw_len_seq, nw_size_seq, nw_dist_seq
