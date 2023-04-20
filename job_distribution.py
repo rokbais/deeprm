@@ -30,35 +30,20 @@ class Dist:
         # new work duration
         nw_len = np.random.randint(1, self.job_len + 1)  # same length in every dimension
 
-        nw_size = np.zeros(self.num_res)
-
-        for i in range(self.num_res):
-            nw_size[i] = np.random.randint(1, self.max_nw_size + 1)
-
-        return nw_len, nw_size
+        return nw_len
 
     def poisson_dist(self):
         # new work duration
         nw_len = np.random.poisson(lam=self.job_len)
-    
-        nw_size = np.zeros(self.num_res)
-    
-        for i in range(self.num_res):
-            nw_size[i] = np.random.randint(1, self.max_nw_size + 1)
-    
-        return nw_len, nw_size
+
+        return nw_len
     
     def exp_dist(self):
         # new work duration
         # WARNING: temp hardcode for max job 15
         nw_len = np.random.exponential(scale=2.5)
-    
-        nw_size = np.zeros(self.num_res)
-    
-        for i in range(self.num_res):
-            nw_size[i] = np.random.randint(1, self.max_nw_size + 1)
-    
-        return nw_len, nw_size
+
+        return nw_len
 
     def bernoulli_dist(self):
         # -- job length --
@@ -66,18 +51,7 @@ class Dist:
             nw_len = np.random.binomial(self.job_len_small_upper, self.job_small_chance)
         else:  # big job
             nw_len = np.random.binomial(self.job_len_big_upper, self.job_big_chance)
-        
-        nw_size = np.zeros(self.num_res)
-
-        # -- job resource request --
-        dominant_res = np.random.randint(0, self.num_res)
-        for i in range(self.num_res):
-            if i == dominant_res:
-                nw_size[i] = np.random.binomial(self.dominant_res_upper, self.dominant_res_chance)
-            else:
-                nw_size[i] = np.random.binomial(self.other_res_upper, self.other_res_chance)
-                
-        return nw_len, nw_size
+        return nw_len
 
     def bi_model_dist(self):
 
@@ -89,19 +63,7 @@ class Dist:
             nw_len = np.random.randint(self.job_len_big_lower,
                                        self.job_len_big_upper + 1)
 
-        nw_size = np.zeros(self.num_res)
-
-        # -- job resource request --
-        dominant_res = np.random.randint(0, self.num_res)
-        for i in range(self.num_res):
-            if i == dominant_res:
-                nw_size[i] = np.random.randint(self.dominant_res_lower,
-                                               self.dominant_res_upper + 1)
-            else:
-                nw_size[i] = np.random.randint(self.other_res_lower,
-                                               self.other_res_upper + 1)
-
-        return nw_len, nw_size
+        return nw_len
 
     def merged_dist(self):
          # self.counter += 1
@@ -113,24 +75,24 @@ class Dist:
          if self.counter_1 < simu_len // 2 and self.counter_2 < simu_len // 2:
              # Choose the distribution based on random probability
              if np.random.rand() < 0.5:
-                 nw_len, nw_size = self.normal_dist()
+                 nw_len = self.normal_dist()
                  dist_name = "Normal"
                  self.counter_1 += 1
              else:
-                 nw_len, nw_size = self.exp_dist()
+                 nw_len = self.exp_dist()
                  dist_name = "Exponential"
                  self.counter_2 += 1
          else:
              # Choose the other distribution to balance the total number of jobs
              if self.counter_1 == simu_len // 2:
-                 nw_len, nw_size = self.exp_dist()
+                 nw_len = self.exp_dist()
                  dist_name = "Exponential"
              else:
-                 nw_len, nw_size = self.normal_dist()
+                 nw_len = self.normal_dist()
                  dist_name = "Normal"
 
          # self.current_dist = dist_name
-         return nw_len, nw_size, dist_name
+         return nw_len, dist_name
 
 
 def sequence_statistics_flat(seq, output_path, title, dist_name):
@@ -222,12 +184,12 @@ def generate_sequence_work(pa, seed=42):
 
     ##############
     # distribution name
-    nw_dist = pa.dist.merged_dist
-    nw_dist_name = "Merged Distribution"
+    nw_dist = pa.dist.bi_model_dist
+    nw_dist_name = "Binomial Distribution"
     ##############
 
     nw_len_seq = np.zeros(simu_len, dtype=int)
-    nw_size_seq = np.zeros((simu_len, pa.num_res), dtype=int)
+    nw_size_seq = np.ones((simu_len, pa.num_res), dtype=int)
 
     nw_dist_seq = np.empty(simu_len, dtype=object)
 
@@ -242,7 +204,7 @@ def generate_sequence_work(pa, seed=42):
             pa.dist.counter_2 = 0
 
         if np.random.rand() < pa.new_job_rate:  # a new job comes
-            nw_len_seq[i], nw_size_seq[i, :], nw_dist_seq[i] = nw_dist()
+            nw_len_seq[i], nw_dist_seq[i] = nw_dist()
 
             #nw_len_seq[i], nw_size_seq[i, :] = nw_dist()
 
@@ -258,6 +220,6 @@ def generate_sequence_work(pa, seed=42):
     sequence_statistics_by_example(nw_len_seq, "./data/", "nw_len_seq_by_example", nw_dist_name, " By Training Set Job Length histogram", "Job Length")
     sequence_statistics_resource_workload(nw_len_seq, nw_size_seq, "./data/", nw_dist_name)
 
-
+    # print(nw_size_seq)
 
     return nw_len_seq, nw_size_seq, nw_dist_seq
