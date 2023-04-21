@@ -28,7 +28,7 @@ class Env:
         # If the caller did not define job len and size, then we generate it here
         if nw_len_seqs is None or nw_size_seqs is None:
             # generate new work
-            self.nw_len_seqs, self.nw_size_seqs = \
+            self.nw_len_seqs, self.nw_size_seqs, self.nw_dist_seqs = \
                 self.generate_sequence_work(self.pa.simu_len * self.pa.num_ex)
 
             self.workload = np.zeros(pa.num_res)
@@ -42,6 +42,9 @@ class Env:
                                            [self.pa.num_ex, self.pa.simu_len])
             self.nw_size_seqs = np.reshape(self.nw_size_seqs,
                                            [self.pa.num_ex, self.pa.simu_len, self.pa.num_res])
+            self.nw_dist_seqs = np.reshape(self.nw_dist_seqs,
+                                           [self.pa.num_ex, pa.simu_len])
+
         else:
             self.nw_len_seqs = nw_len_seqs
             self.nw_size_seqs = nw_size_seqs
@@ -61,15 +64,16 @@ class Env:
     def generate_sequence_work(self, simu_len):
 
         nw_len_seq = np.zeros(simu_len, dtype=int)
-        nw_size_seq = np.zeros((simu_len, self.pa.num_res), dtype=int)
+        nw_size_seq = np.ones((simu_len, self.pa.num_res), dtype=int)
+        nw_dist_seq = np.empty(simu_len, dtype=object)
 
         for i in range(simu_len):
 
             if np.random.rand() < self.pa.new_job_rate:  # a new job comes
 
-                nw_len_seq[i], nw_size_seq[i, :] = self.nw_dist()
+                nw_len_seq[i], nw_dist_seq[i]  = self.nw_dist()
 
-        return nw_len_seq, nw_size_seq
+        return nw_len_seq, nw_size_seq, nw_dist_seq
 
     def get_new_job_from_seq(self, seq_no, seq_idx):
         new_job = Job(res_vec=self.nw_size_seqs[seq_no, seq_idx, :],

@@ -9,6 +9,7 @@ class Dist:
         self.job_len = job_len
 
         self.job_small_chance = 0.8
+        self.job_big_chance = 1 - self.job_small_chance
 
         self.job_len_big_lower = job_len * 2 / 3
         self.job_len_big_upper = job_len
@@ -75,8 +76,8 @@ class Dist:
          if self.counter_1 < simu_len // 2 and self.counter_2 < simu_len // 2:
              # Choose the distribution based on random probability
              if np.random.rand() < 0.5:
-                 nw_len = self.normal_dist()
-                 dist_name = "Normal"
+                 nw_len = self.poisson_dist()
+                 dist_name = "Poisson"
                  self.counter_1 += 1
              else:
                  nw_len = self.exp_dist()
@@ -88,8 +89,8 @@ class Dist:
                  nw_len = self.exp_dist()
                  dist_name = "Exponential"
              else:
-                 nw_len = self.normal_dist()
-                 dist_name = "Normal"
+                 nw_len = self.poisson_dist()
+                 dist_name = "Poisson"
 
          # self.current_dist = dist_name
          return nw_len, dist_name
@@ -184,8 +185,8 @@ def generate_sequence_work(pa, seed=42):
 
     ##############
     # distribution name
-    nw_dist = pa.dist.bi_model_dist
-    nw_dist_name = "Binomial Distribution"
+    nw_dist = pa.dist.exp_dist
+    nw_dist_name = "Exponential Distribution"
     ##############
 
     nw_len_seq = np.zeros(simu_len, dtype=int)
