@@ -232,14 +232,16 @@ def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
     envs = []
 
     # Generate custom job length and size
-    nw_len_seqs, nw_size_seqs, nw_source_seqs = job_distribution.generate_sequence_work(pa, seed=42)
+    nw_len_seqs, nw_size_seqs, nw_dist_seqs = job_distribution.generate_sequence_work(pa, seed=42)
 
+    # exit(0)
+    
     for ex in xrange(pa.num_ex):
 
         print "-prepare for env-", ex
 
         env = environment.Env(pa, nw_len_seqs=nw_len_seqs, nw_size_seqs=nw_size_seqs,
-                              nw_source_seqs=nw_source_seqs, render=False, repre=repre, end=end)
+                              nw_dist_seqs=nw_dist_seqs, render=False, repre=repre, end=end)
         env.seq_no = ex
         envs.append(env)
 

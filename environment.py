@@ -7,7 +7,7 @@ import parameters
 
 
 class Env:
-    def __init__(self, pa, nw_len_seqs=None, nw_size_seqs=None, nw_source_seqs=None,
+    def __init__(self, pa, nw_len_seqs=None, nw_size_seqs=None, nw_dist_seqs=None,
                  seed=42, render=False, repre='image', end='no_new_job'):
 
         self.pa = pa
@@ -15,7 +15,7 @@ class Env:
         self.repre = repre  # image or compact representation
         self.end = end  # termination type, 'no_new_job' or 'all_done'
 
-        self.nw_dist = pa.dist.bi_model_dist
+        self.nw_dist = pa.dist.exp_dist
 
         self.curr_time = 0
 
@@ -48,7 +48,7 @@ class Env:
         else:
             self.nw_len_seqs = nw_len_seqs
             self.nw_size_seqs = nw_size_seqs
-            self.nw_source_seqs = nw_source_seqs
+            self.nw_dist_seqs = nw_dist_seqs
 
         self.seq_no = 0  # which example sequence
         self.seq_idx = 0  # index in that sequence
