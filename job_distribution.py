@@ -8,7 +8,7 @@ class Dist:
         self.max_nw_size = max_nw_size
         self.job_len = job_len
 
-        self.job_small_chance = 0.8
+        self.job_small_chance = 0.117
         self.job_big_chance = 1 - self.job_small_chance
 
         self.job_len_big_lower = job_len * 2 / 3
@@ -25,6 +25,7 @@ class Dist:
 
         self.counter_1 = 0
         self.counter_2 = 0
+    
 
         # Use for merge distributions
         self.dist_a = self.exp_dist
@@ -36,20 +37,20 @@ class Dist:
     def normal_dist(self):
 
         # new work duration
-        nw_len = np.random.randint(1, self.job_len + 1)  # same length in every dimension
+        nw_len = np.random.randint(1, self.job_len + 9)  # same length in every dimension
 
         return nw_len, 7
 
     def poisson_dist(self):
         # new work duration
-        nw_len = np.random.poisson(lam=self.job_len)
-
+        nw_len = np.random.poisson(lam=self.job_len-4.004)
         return nw_len, 3
-    
+
     def exp_dist(self):
         # new work duration
         # WARNING: temp hardcode for max job 15
-        nw_len = np.random.exponential(scale=2.5)
+        nw_len = np.random.exponential(scale=13.65)
+
         return nw_len, 4
 
     def bernoulli_dist(self):
@@ -63,7 +64,7 @@ class Dist:
     def bi_model_dist(self):
 
         # -- job length --
-        if np.random.rand() < self.job_small_chance:  # small job
+        if np.random.rand() < 0.09:  # small job
             nw_len = np.random.randint(self.job_len_small_lower,
                                        self.job_len_small_upper + 1)
         else:  # big job
@@ -192,7 +193,7 @@ def generate_sequence_work(pa, seed=42):
     # distribution name
     nw_dist = pa.dist.merged_dist
     nw_dist_name = "Exponential + Bernoulli Distribution"
-    ##############
+
 
     nw_len_seq = np.zeros(simu_len, dtype=int)
     nw_size_seq = np.ones((simu_len, pa.num_res), dtype=int)
