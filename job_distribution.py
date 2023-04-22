@@ -30,22 +30,22 @@ class Dist:
     def normal_dist(self):
 
         # new work duration
-        nw_len = np.random.randint(1, self.job_len + 9)  # same length in every dimension
+        nw_len = np.random.randint(1, self.job_len )  #9 same length in every dimension
 
-        return nw_len,"norm"
+        return nw_len
 
     def poisson_dist(self):
         # new work duration
         nw_len = np.random.poisson(lam=self.job_len-4.004)
 
-        return nw_len, "pois"
+        return nw_len
     
     def exp_dist(self):
         # new work duration
         # WARNING: temp hardcode for max job 15
         nw_len = np.random.exponential(scale=13.65)
 
-        return nw_len, "expo"
+        return nw_len
 
     def bernoulli_dist(self):
         # -- job length --
@@ -53,19 +53,19 @@ class Dist:
             nw_len = np.random.binomial(self.job_len_small_upper, self.job_small_chance)
         else:  # big job
             nw_len = np.random.binomial(self.job_len_big_upper, self.job_big_chance)
-        return nw_len, "bern"
+        return nw_len
 
     def bi_model_dist(self):
 
         # -- job length --
-        if np.random.rand() < 0.09:  # small job
+        if np.random.rand() < 0.25:  # small job
             nw_len = np.random.randint(self.job_len_small_lower,
                                        self.job_len_small_upper + 1)
         else:  # big job
             nw_len = np.random.randint(self.job_len_big_lower,
                                        self.job_len_big_upper + 1)
 
-        return nw_len, "bino"
+        return nw_len
 
     def merged_dist(self):
          # self.counter += 1
@@ -77,8 +77,8 @@ class Dist:
          if self.counter_1 < simu_len // 2 and self.counter_2 < simu_len // 2:
              # Choose the distribution based on random probability
              if np.random.rand() < 0.5:
-                 nw_len = self.poisson_dist()
-                 dist_name = "Poisson"
+                 nw_len = self.normal_dist()
+                 dist_name = "bi_model_dist"
                  self.counter_1 += 1
              else:
                  nw_len = self.exp_dist()
@@ -90,8 +90,8 @@ class Dist:
                  nw_len = self.exp_dist()
                  dist_name = "Exponential"
              else:
-                 nw_len = self.poisson_dist()
-                 dist_name = "Poisson"
+                 nw_len = self.normal_dist()
+                 dist_name = "bi_model_dist"
 
          # self.current_dist = dist_name
          return nw_len, dist_name
@@ -186,8 +186,8 @@ def generate_sequence_work(pa, seed=42):
 
     ##############
     # distribution name
-    nw_dist = pa.dist.bi_model_dist
-    nw_dist_name = "Exponential Distribution"
+    nw_dist = pa.dist.merged_dist
+    nw_dist_name = "Bimodel and Exponential Distribution"
     ##############
 
     nw_len_seq = np.zeros(simu_len, dtype=int)
