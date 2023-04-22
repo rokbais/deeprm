@@ -15,7 +15,7 @@ class Env:
         self.repre = repre  # image or compact representation
         self.end = end  # termination type, 'no_new_job' or 'all_done'
 
-        self.nw_dist = pa.dist.exp_dist
+        self.nw_dist = pa.dist.merged_dist
 
         self.curr_time = 0
 
@@ -65,7 +65,7 @@ class Env:
 
         nw_len_seq = np.zeros(simu_len, dtype=int)
         nw_size_seq = np.ones((simu_len, self.pa.num_res), dtype=int)
-        nw_dist_seq = np.empty(simu_len, dtype=object)
+        nw_dist_seq = np.empty(simu_len, dtype=int)
 
         for i in range(simu_len):
 
@@ -78,7 +78,7 @@ class Env:
     def get_new_job_from_seq(self, seq_no, seq_idx):
         new_job = Job(res_vec=self.nw_size_seqs[seq_no, seq_idx, :],
                       job_len=self.nw_len_seqs[seq_no, seq_idx],
-                      job_dist=self.nw_dist_seqs[seq_no],
+                      job_dist=self.nw_dist_seqs[seq_no, seq_idx],
                       job_id=len(self.job_record.record),
                       enter_time=self.curr_time)
         return new_job
