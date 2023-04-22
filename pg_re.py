@@ -134,20 +134,32 @@ def process_all_info(trajs):
     enter_time = []
     finish_time = []
     job_len = []
+    job_dist = []
 
     for traj in trajs:
         enter_time.append(np.array([traj['info'].record[i].enter_time for i in xrange(len(traj['info'].record))]))
         finish_time.append(np.array([traj['info'].record[i].finish_time for i in xrange(len(traj['info'].record))]))
         job_len.append(np.array([traj['info'].record[i].len for i in xrange(len(traj['info'].record))]))
+        job_dist.append(np.array([traj['info'].record[i].job_dist for i in xrange(len(traj['info'].record))]))
+
+    # for i in xrange(len(traj['info'].record)):
+    #     print("job_len={}, job_dist={}".format(traj['info'].record[i].len, traj['info'].record[i].job_dist))
+
+    # print("process_all_info: before concat job_len.shape={}, job_dist.shape={}".format(job_len.shape, job_dist.shape))
 
     enter_time = np.concatenate(enter_time)
     finish_time = np.concatenate(finish_time)
     job_len = np.concatenate(job_len)
+    job_dist = np.concatenate(job_dist)
 
-    return enter_time, finish_time, job_len
+    # print("process_all_info: after concat job_len.shape={}, job_dist.shape={}".format(job_len.shape, job_dist.shape))
+
+
+    return enter_time, finish_time, job_len, job_dist
 
 
 def plot_lr_curve(output_file_prefix, max_rew_lr_curve, mean_rew_lr_curve, slow_down_lr_curve,
+                  dist_a_slow_down_lr_curve,  dist_b_slow_down_lr_curve,
                   ref_discount_rews, ref_slow_down):
     num_colors = len(ref_discount_rews) + 2
     cm = plt.get_cmap('gist_rainbow')
@@ -169,7 +181,10 @@ def plot_lr_curve(output_file_prefix, max_rew_lr_curve, mean_rew_lr_curve, slow_
     ax = fig.add_subplot(122)
     ax.set_color_cycle([cm(1. * i / num_colors) for i in range(num_colors)])
 
-    ax.plot(slow_down_lr_curve, linewidth=2, label='PG mean')
+    ax.plot(slow_down_lr_curve, linewidth=2, label='PG mean - total')
+    ax.plot(dist_a_slow_down_lr_curve, linewidth=2, label='PG mean - dist A')
+    ax.plot(dist_b_slow_down_lr_curve, linewidth=2, label='PG mean - dist B')
+
     for k in ref_discount_rews:
         ax.plot(np.tile(np.average(np.concatenate(ref_slow_down[k])), len(slow_down_lr_curve)), linewidth=2, label=k)
 
@@ -207,9 +222,16 @@ def get_traj_worker(pg_learner, env, pa, result):
     all_eplens = np.array([len(traj["reward"]) for traj in trajs])  # episode lengths
 
     # All Job Stat
-    enter_time, finish_time, job_len = process_all_info(trajs)
+    enter_time, finish_time, job_len, job_dist = process_all_info(trajs)
     finished_idx = (finish_time >= 0)
+    # print("finished_idx={}".format(finished_idx))
+    dist_a_idx = (job_dist == pa.dist.dist_a_name)
+    # print("job_dist={}".format(job_dist))
+    # print("job_len.shape={}".format(job_len.shape))
+    dist_b_idx = (job_dist == pa.dist.dist_b_name)
     all_slowdown = (finish_time[finished_idx] - enter_time[finished_idx]) / job_len[finished_idx]
+    dist_a_slowdown = (finish_time[finished_idx & dist_a_idx] - enter_time[finished_idx & dist_a_idx]) / job_len[finished_idx & dist_a_idx]
+    dist_b_slowdown = (finish_time[finished_idx & dist_b_idx] - enter_time[finished_idx & dist_b_idx]) / job_len[finished_idx & dist_b_idx]
 
     all_entropy = np.concatenate([traj["entropy"] for traj in trajs])
 
@@ -219,6 +241,8 @@ def get_traj_worker(pg_learner, env, pa, result):
                    "all_eprews": all_eprews,
                    "all_eplens": all_eplens,
                    "all_slowdown": all_slowdown,
+                   "dist_a_slowdown": dist_a_slowdown,
+                   "dist_b_slowdown": dist_b_slowdown,
                    "all_entropy": all_entropy})
 
 
@@ -233,6 +257,9 @@ def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
 
     # Generate custom job length and size
     nw_len_seqs, nw_size_seqs, nw_dist_seqs = job_distribution.generate_sequence_work(pa, seed=42)
+
+    print("nw_dist_seqs=")
+    print(nw_dist_seqs)
 
     # exit(0)
     
@@ -268,6 +295,8 @@ def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
     mean_rew_lr_curve = []
     max_rew_lr_curve = []
     slow_down_lr_curve = []
+    dist_a_slow_down_lr_curve = []
+    dist_b_slow_down_lr_curve = []
 
     # --------------------------------------
     print("Start training...")
@@ -290,6 +319,8 @@ def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
         eprews = []
         eplens = []
         all_slowdown = []
+        dist_a_slowdown = []
+        dist_b_slowdown = []
         all_entropy = []
 
         ex_counter = 0
@@ -337,6 +368,8 @@ def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
                 eplens.extend(np.concatenate([r["all_eplens"] for r in result]))  # episode lengths
 
                 all_slowdown.extend(np.concatenate([r["all_slowdown"] for r in result]))
+                dist_a_slowdown.extend(np.concatenate([r["dist_a_slowdown"] for r in result]))
+                dist_b_slowdown.extend(np.concatenate([r["dist_b_slowdown"] for r in result]))
                 all_entropy.extend(np.concatenate([r["all_entropy"] for r in result]))
 
         # assemble gradients
@@ -363,6 +396,8 @@ def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
         print "MaxRew: \t %s" % np.average([np.max(rew) for rew in all_eprews])
         print "MeanRew: \t %s +- %s" % (np.mean(eprews), np.std(eprews))
         print "MeanSlowdown: \t %s" % np.mean(all_slowdown)
+        print "MeanSlowdown - A \t %s" % np.mean(dist_a_slowdown)
+        print "MeanSlowdown - B \t %s" % np.mean(dist_b_slowdown)
         print "MeanLen: \t %s +- %s" % (np.mean(eplens), np.std(eplens))
         print "MeanEntropy \t %s" % (np.mean(all_entropy))
         print "Elapsed time\t %s" % (timer_end - timer_start), "seconds"
@@ -373,6 +408,8 @@ def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
         max_rew_lr_curve.append(np.average([np.max(rew) for rew in all_eprews]))
         mean_rew_lr_curve.append(np.mean(eprews))
         slow_down_lr_curve.append(np.mean(all_slowdown))
+        dist_a_slow_down_lr_curve.append(np.mean(dist_a_slowdown))
+        dist_b_slow_down_lr_curve.append(np.mean(dist_b_slowdown))
 
         if iteration % pa.output_freq == 0:
             param_file = open(pa.output_filename + '_' + str(iteration) + '.pkl', 'wb')
@@ -387,6 +424,7 @@ def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
 
             plot_lr_curve(pa.output_filename,
                           max_rew_lr_curve, mean_rew_lr_curve, slow_down_lr_curve,
+                          dist_a_slow_down_lr_curve, dist_b_slow_down_lr_curve,
                           ref_discount_rews, ref_slow_down)
 
 

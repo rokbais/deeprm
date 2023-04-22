@@ -27,25 +27,46 @@ class Dist:
         self.counter_2 = 0
     
 
+        # Use for merge distributions
+        self.dist_a = self.exp_dist
+        self.dist_b = self.bernoulli_dist
+
+        self.dist_a_name = 1
+        self.dist_b_name = 2
+
     def normal_dist(self):
 
         # new work duration
         nw_len = np.random.randint(1, self.job_len )  #9 same length in every dimension
 
+<<<<<<< HEAD
         return nw_len
+=======
+        return nw_len, 7
+>>>>>>> d0a87307be13699ae5708038989ed44b10bb2729
 
     def poisson_dist(self):
         # new work duration
         nw_len = np.random.poisson(lam=self.job_len-4.004)
 
+<<<<<<< HEAD
         return nw_len
+=======
+
+        return nw_len, 3
+>>>>>>> d0a87307be13699ae5708038989ed44b10bb2729
     
     def exp_dist(self):
         # new work duration
         # WARNING: temp hardcode for max job 15
         nw_len = np.random.exponential(scale=13.65)
 
+<<<<<<< HEAD
         return nw_len
+=======
+        return nw_len, 4
+
+>>>>>>> d0a87307be13699ae5708038989ed44b10bb2729
 
     def bernoulli_dist(self):
         # -- job length --
@@ -53,7 +74,11 @@ class Dist:
             nw_len = np.random.binomial(self.job_len_small_upper, self.job_small_chance)
         else:  # big job
             nw_len = np.random.binomial(self.job_len_big_upper, self.job_big_chance)
+<<<<<<< HEAD
         return nw_len
+=======
+        return nw_len, 5
+>>>>>>> d0a87307be13699ae5708038989ed44b10bb2729
 
     def bi_model_dist(self):
 
@@ -64,34 +89,47 @@ class Dist:
         else:  # big job
             nw_len = np.random.randint(self.job_len_big_lower,
                                        self.job_len_big_upper + 1)
+<<<<<<< HEAD
 
         return nw_len
+=======
+        return nw_len, 6
+>>>>>>> d0a87307be13699ae5708038989ed44b10bb2729
 
     def merged_dist(self):
-         # self.counter += 1
-         # if self.counter % 2 == 0:  # Alternate between the two distributions
-         #     return self.normal_dist()
-         # else:
-         #     return self.exp_dist()
          simu_len = 500
          if self.counter_1 < simu_len // 2 and self.counter_2 < simu_len // 2:
              # Choose the distribution based on random probability
              if np.random.rand() < 0.5:
+<<<<<<< HEAD
                  nw_len = self.normal_dist()
                  dist_name = "bi_model_dist"
+=======
+                 # distribution 0
+                 nw_len, _ = self.dist_a()
+                 dist_name = self.dist_a_name
+>>>>>>> d0a87307be13699ae5708038989ed44b10bb2729
                  self.counter_1 += 1
              else:
-                 nw_len = self.exp_dist()
-                 dist_name = "Exponential"
+                # distribution 1
+                 nw_len, _ = self.dist_b()
+                 dist_name = self.dist_b_name
                  self.counter_2 += 1
          else:
              # Choose the other distribution to balance the total number of jobs
              if self.counter_1 == simu_len // 2:
-                 nw_len = self.exp_dist()
-                 dist_name = "Exponential"
+                # distribution 1
+                 nw_len, _ = self.dist_b()
+                 dist_name = self.dist_b_name
              else:
+<<<<<<< HEAD
                  nw_len = self.normal_dist()
                  dist_name = "bi_model_dist"
+=======
+                # distribution 0
+                 nw_len, _ = self.dist_a()
+                 dist_name = self.dist_a_name
+>>>>>>> d0a87307be13699ae5708038989ed44b10bb2729
 
          # self.current_dist = dist_name
          return nw_len, dist_name
@@ -187,13 +225,18 @@ def generate_sequence_work(pa, seed=42):
     ##############
     # distribution name
     nw_dist = pa.dist.merged_dist
+<<<<<<< HEAD
     nw_dist_name = "Bimodel and Exponential Distribution"
+=======
+    nw_dist_name = "Exponential + Bernoulli Distribution"
+>>>>>>> d0a87307be13699ae5708038989ed44b10bb2729
     ##############
 
     nw_len_seq = np.zeros(simu_len, dtype=int)
     nw_size_seq = np.ones((simu_len, pa.num_res), dtype=int)
 
-    nw_dist_seq = np.empty(simu_len, dtype=object)
+    # nw_dist_seq = np.empty(simu_len, dtype=int)
+    nw_dist_seq = np.zeros(simu_len, dtype=int)
 
     # for i in range(simu_len):
 
@@ -221,7 +264,5 @@ def generate_sequence_work(pa, seed=42):
 
     sequence_statistics_by_example(nw_len_seq, "./data/", "nw_len_seq_by_example", nw_dist_name, " By Training Set Job Length histogram", "Job Length")
     sequence_statistics_resource_workload(nw_len_seq, nw_size_seq, "./data/", nw_dist_name)
-
-    # print(nw_size_seq)
 
     return nw_len_seq, nw_size_seq, nw_dist_seq
