@@ -9,6 +9,7 @@ class Dist:
         self.job_len = job_len
 
         self.job_small_chance = 0.117
+        self.job_small_chance = 0.117
         self.job_big_chance = 1 - self.job_small_chance
 
         self.job_len_big_lower = job_len * 2 / 3
@@ -27,6 +28,8 @@ class Dist:
         self.counter_2 = 0
     
 
+    
+
         # Use for merge distributions
         self.dist_a = self.exp_dist
         self.dist_b = self.bernoulli_dist
@@ -38,12 +41,15 @@ class Dist:
 
         # new work duration
         nw_len = np.random.randint(1, self.job_len + 9)  # same length in every dimension
+        nw_len = np.random.randint(1, self.job_len + 9)  # same length in every dimension
 
         return nw_len, 7
 
     def poisson_dist(self):
         # new work duration
         nw_len = np.random.poisson(lam=self.job_len-4.004)
+
+
         return nw_len, 3
 
     def exp_dist(self):
@@ -52,6 +58,7 @@ class Dist:
         nw_len = np.random.exponential(scale=13.65)
 
         return nw_len, 4
+
 
     def bernoulli_dist(self):
         # -- job length --
@@ -70,7 +77,6 @@ class Dist:
         else:  # big job
             nw_len = np.random.randint(self.job_len_big_lower,
                                        self.job_len_big_upper + 1)
-
         return nw_len, 6
 
     def merged_dist(self):
