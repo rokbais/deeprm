@@ -8,6 +8,7 @@ import pg_network
 import other_agents
 
 
+
 def discount(x, gamma):
     """
     Given vector x, computes a vector y such that
@@ -161,6 +162,7 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
         fig = plt.figure()
         ax = fig.add_subplot(111)
         ax.set_color_cycle([cm(1. * i / num_colors) for i in range(num_colors)])
+        #ax.set_prop_cycle(cycler('color', ['black', 'red','blue','orange','green']))
 
         for test_type in test_types:
             slow_down_cdf = np.sort(np.concatenate(jobs_slow_down[test_type]))

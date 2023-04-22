@@ -1,0 +1,12 @@
+======================================
+Statistic on jobs: 
+======================================
+sequence is: nw_len_seq_by_example
+sequence size is:  500
+sequence shape is: (10, 50)
+range of value is: 64
+max is:  64
+min is:  0
+mean is: 8.104
+std is:  11.1755619098
+var is:  124.893184

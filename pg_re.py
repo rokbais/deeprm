@@ -226,9 +226,12 @@ def get_traj_worker(pg_learner, env, pa, result):
     finished_idx = (finish_time >= 0)
     # print("finished_idx={}".format(finished_idx))
     dist_a_idx = (job_dist == pa.dist.dist_a_name)
+    print("dist_a_idx={}".format(dist_a_idx))
+    
     # print("job_dist={}".format(job_dist))
     # print("job_len.shape={}".format(job_len.shape))
     dist_b_idx = (job_dist == pa.dist.dist_b_name)
+    print("dist_a_idx={}".format(dist_a_idx))
     all_slowdown = (finish_time[finished_idx] - enter_time[finished_idx]) / job_len[finished_idx]
     dist_a_slowdown = (finish_time[finished_idx & dist_a_idx] - enter_time[finished_idx & dist_a_idx]) / job_len[finished_idx & dist_a_idx]
     dist_b_slowdown = (finish_time[finished_idx & dist_b_idx] - enter_time[finished_idx & dist_b_idx]) / job_len[finished_idx & dist_b_idx]
