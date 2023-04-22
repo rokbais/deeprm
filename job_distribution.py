@@ -25,17 +25,18 @@ class Dist:
 
         self.counter_1 = 0
         self.counter_2 = 0
-    
 
         # Use for merge distributions
         self.dist_a = self.exp_dist
         self.dist_b = self.poisson_dist
 
-        self.dist_a_name = 1
-        self.dist_b_name = 2
+        self.dist_a_id = 1
+        self.dist_b_id = 2
+
+        self.dist_a_name = "Expo"
+        self.dist_b_name = "Pois"
 
     def normal_dist(self):
-
         # new work duration
         nw_len = np.random.randint(1, self.job_len )  #9 same length in every dimension
 
@@ -43,11 +44,10 @@ class Dist:
 
     def poisson_dist(self):
         # new work duration
-        nw_len = np.random.poisson(lam=self.job_len +55)
-
+        nw_len = np.random.poisson(lam=self.job_len-4.004)
 
         return nw_len, 3
-    
+
     def exp_dist(self):
         # new work duration
         # WARNING: temp hardcode for max job 15
@@ -82,23 +82,23 @@ class Dist:
              if np.random.rand() < 0.5:
                  # distribution 0
                  nw_len, _ = self.dist_a()
-                 dist_name = self.dist_a_name
+                 dist_name = self.dist_a_id
                  self.counter_1 += 1
              else:
                 # distribution 1
                  nw_len, _ = self.dist_b()
-                 dist_name = self.dist_b_name
+                 dist_name = self.dist_b_id
                  self.counter_2 += 1
          else:
              # Choose the other distribution to balance the total number of jobs
              if self.counter_1 == simu_len // 2:
                 # distribution 1
                  nw_len, _ = self.dist_b()
-                 dist_name = self.dist_b_name
+                 dist_name = self.dist_b_id
              else:
                 # distribution 0
                  nw_len, _ = self.dist_a()
-                 dist_name = self.dist_a_name
+                 dist_name = self.dist_a_id
 
          # self.current_dist = dist_name
          return nw_len, dist_name
@@ -194,8 +194,8 @@ def generate_sequence_work(pa, seed=42):
     ##############
     # distribution name
     nw_dist = pa.dist.merged_dist
-    nw_dist_name = "meerged Distribution"
-    ##############
+    nw_dist_name = "Exponential + Poisson Distribution"
+
 
     nw_len_seq = np.zeros(simu_len, dtype=int)
     nw_size_seq = np.ones((simu_len, pa.num_res), dtype=int)
