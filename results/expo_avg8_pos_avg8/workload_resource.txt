@@ -1,0 +1,12 @@
+======================================
+Statistic on jobs: 
+======================================
+sequence is: workload_resource
+sequence size is:  500
+sequence shape is: (10, 50)
+range of value is: 128.0
+max is:  128.0
+min is:  0.0
+mean is: 16.632
+std is:  19.3101158982
+var is:  372.880576
