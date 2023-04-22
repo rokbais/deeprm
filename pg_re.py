@@ -13,6 +13,8 @@ import job_distribution
 import pg_network
 import slow_down_cdf
 
+dist_a_name = "Expo"
+dist_b_name = "Pois"
 
 def init_accums(pg_learner):  # in rmsprop
     accums = []
@@ -161,7 +163,7 @@ def process_all_info(trajs):
 def plot_lr_curve(output_file_prefix, max_rew_lr_curve, mean_rew_lr_curve, slow_down_lr_curve,
                   dist_a_slow_down_lr_curve,  dist_b_slow_down_lr_curve,
                   ref_discount_rews, ref_slow_down):
-    num_colors = len(ref_discount_rews) + 2
+    num_colors = len(ref_discount_rews) + 4
     cm = plt.get_cmap('gist_rainbow')
 
     fig = plt.figure(figsize=(12, 5))
@@ -181,9 +183,9 @@ def plot_lr_curve(output_file_prefix, max_rew_lr_curve, mean_rew_lr_curve, slow_
     ax = fig.add_subplot(122)
     ax.set_color_cycle([cm(1. * i / num_colors) for i in range(num_colors)])
 
-    ax.plot(slow_down_lr_curve, linewidth=2, label='PG mean - total')
-    ax.plot(dist_a_slow_down_lr_curve, linewidth=2, label='PG mean - dist A')
-    ax.plot(dist_b_slow_down_lr_curve, linewidth=2, label='PG mean - dist B')
+    ax.plot(slow_down_lr_curve, linewidth=2, label='PG mean - Total')
+    ax.plot(dist_a_slow_down_lr_curve, linewidth=2, label="PG mean - {}".format(dist_a_name))
+    ax.plot(dist_b_slow_down_lr_curve, linewidth=2, label="PG mean - {}".format(dist_b_name))
 
     for k in ref_discount_rews:
         ax.plot(np.tile(np.average(np.concatenate(ref_slow_down[k])), len(slow_down_lr_curve)), linewidth=2, label=k)
@@ -224,11 +226,8 @@ def get_traj_worker(pg_learner, env, pa, result):
     # All Job Stat
     enter_time, finish_time, job_len, job_dist = process_all_info(trajs)
     finished_idx = (finish_time >= 0)
-    # print("finished_idx={}".format(finished_idx))
-    dist_a_idx = (job_dist == pa.dist.dist_a_name)
-    # print("job_dist={}".format(job_dist))
-    # print("job_len.shape={}".format(job_len.shape))
-    dist_b_idx = (job_dist == pa.dist.dist_b_name)
+    dist_a_idx = (job_dist == pa.dist.dist_a_id)
+    dist_b_idx = (job_dist == pa.dist.dist_b_id)
     all_slowdown = (finish_time[finished_idx] - enter_time[finished_idx]) / job_len[finished_idx]
     dist_a_slowdown = (finish_time[finished_idx & dist_a_idx] - enter_time[finished_idx & dist_a_idx]) / job_len[finished_idx & dist_a_idx]
     dist_b_slowdown = (finish_time[finished_idx & dist_b_idx] - enter_time[finished_idx & dist_b_idx]) / job_len[finished_idx & dist_b_idx]
@@ -396,8 +395,8 @@ def launch(pa, pg_resume=None, render=False, repre='image', end='no_new_job'):
         print "MaxRew: \t %s" % np.average([np.max(rew) for rew in all_eprews])
         print "MeanRew: \t %s +- %s" % (np.mean(eprews), np.std(eprews))
         print "MeanSlowdown: \t %s" % np.mean(all_slowdown)
-        print "MeanSlowdown - A \t %s" % np.mean(dist_a_slowdown)
-        print "MeanSlowdown - B \t %s" % np.mean(dist_b_slowdown)
+        print("MeanSlowdown - {} \t {}".format(pa.dist.dist_a_name, np.mean(dist_a_slowdown)))
+        print("MeanSlowdown - {} \t {}".format(pa.dist.dist_b_name, np.mean(dist_b_slowdown)))
         print "MeanLen: \t %s +- %s" % (np.mean(eplens), np.std(eplens))
         print "MeanEntropy \t %s" % (np.mean(all_entropy))
         print "Elapsed time\t %s" % (timer_end - timer_start), "seconds"
