@@ -9,7 +9,6 @@ class Dist:
         self.job_len = job_len
 
         self.job_small_chance = 0.117
-        self.job_small_chance = 0.117
         self.job_big_chance = 1 - self.job_small_chance
 
         self.job_len_big_lower = job_len * 2 / 3

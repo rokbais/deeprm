@@ -129,6 +129,11 @@ def launch(pa, pg_resume=None, render=False, plot=False, repre='image', end='no_
             finish_time = np.array([info.record[i].finish_time for i in xrange(len(info.record))])
             job_len = np.array([info.record[i].len for i in xrange(len(info.record))])
             job_total_size = np.array([np.sum(info.record[i].res_vec) for i in xrange(len(info.record))])
+            distribution = np.array([info.record[i].job_dist for i in xrange(len(info.record))])
+
+            # if test_type == 'PG':
+            #     print("Dist Info:")
+            #     print(distribution)
 
             finished_idx = (finish_time >= 0)
             unfinished_idx = (finish_time < 0)
