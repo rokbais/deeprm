@@ -1,0 +1,38 @@
+======================================
+Statistic on jobs: pois
+======================================
+sequence is: nw_len_seq_by_example
+sequence size is:  500
+sequence shape is: (10, 50)
+range of value is: 16
+max is:  16
+min is:  0
+mean is: 5.316
+std is:  4.13039271741
+var is:  17.060144
+
+======================================
+Statistic on jobs: exp
+======================================
+sequence is: nw_len_seq_by_example
+sequence size is:  500
+sequence shape is: (10, 50)
+range of value is: 44
+max is:  44
+min is:  0
+mean is: 5.16
+std is:  7.72595625149
+var is:  59.6904
+
+======================================
+Statistic on jobs: 
+======================================
+sequence is: nw_len_seq_by_example
+sequence size is:  500
+sequence shape is: (10, 50)
+range of value is: 45
+max is:  45
+min is:  0
+mean is: 5.444
+std is:  6.34025740802
+var is:  40.198864
